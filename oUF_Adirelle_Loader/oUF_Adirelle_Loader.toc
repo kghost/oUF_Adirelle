@@ -1,0 +1,7 @@
+## Interface: 40000
+## Author: Adirelle
+## Version: 1.0
+## Title: oUF_Adirelle - loader
+## Notes: Load other oUF_Adirelle when appropriate.
+
+..\oUF_Adirelle\loader.lua

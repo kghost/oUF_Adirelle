@@ -44,6 +44,7 @@ move-folders:
   oUF_Adirelle/oUF_Adirelle_Boss: oUF_Adirelle_Boss
   oUF_Adirelle/oUF_Adirelle_Arena: oUF_Adirelle_Arena
   oUF_Adirelle/oUF_Adirelle_Config: oUF_Adirelle_Config
+  oUF_Adirelle/oUF_Adirelle_Loader: oUF_Adirelle_Loader
 
 ignore:
   - media/*.png
