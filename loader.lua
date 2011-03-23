@@ -4,57 +4,61 @@ Adirelle's oUF layout
 All rights reserved.
 --]=]
 
-local modules = {
-	oUF_Adirelle_Raid = {
-		event = "PLAYER_MEMBERS_CHANGED",
-		test = function() return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0 end, 
-	},
-	oUF_Adirelle_Arena = {
-		event = "PLAYER_ENTERING_WORLD",
-		test = function() return select(2, IsInInstance()) == "arena" end,
-	},
-	oUF_Adirelle_Boss = {
-		event = "PLAYER_ENTERING_WORLD",
-		test = function()
-			local _, iType = IsInInstance()
-			return iType == "party" or iType == "raid"
-		end,
-	},
-}
+local Debug
+if AdiDebug then
+	Debug = AdiDebug:GetSink("oUF_Adirelle_Loader")
+else
+	function Debug() end
+end
 
--- Remove modules that cannot be loaded
-for name, data in pairs(modules) do
-	local _, _, enabled, loadable = GetAddOnInfo(name)
-	if IsAddOnLoaded(name) or not enabled or not loadable then
-		modules[name] = nil
+local loaderName = ...
+local loaderFrame = CreateFrame("Frame")
+
+local function CanLoad(name)
+	if not IsAddOnLoaded(name) then
+		local _, _, _, enabled, loadable = GetAddOnInfo(name)
+		return enabled and loadable
 	end
 end
 
-if not next(modules) then return end
+local function LoadModules(event)
+	Debug('Trying to load modules on', event)
+	if CanLoad('oUF_Adirelle_Raid') and (GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0 )then
+		Debug('Loading oUF_Adirelle_Raid')
+		LoadAddOn('oUF_Adirelle_Raid')
+	end
+	local _, instanceType = IsInInstance()
+	if CanLoad('oUF_Adirelle_Boss') and (instanceType == "party" or instanceType == "raid") then
+		Debug('Loading oUF_Adirelle_Boss')
+		LoadAddon('oUF_Adirelle_Boss')
+	elseif CanLoad('oUF_Adirelle_Arena') and instanceType == "arena" then
+		Debug('Loading oUF_Adirelle_Arena')
+		LoadAddon('oUF_Adirelle_Arena')
+	end
+	if not CanLoad('oUF_Adirelle_Raid') and loaderFrame:IsEventRegistered('PARTY_MEMBERS_CHANGED') then
+		Debug('Stop listening to PARTY_MEMBERS_CHANGED')
+		loaderFrame:UnregisterEvent('PARTY_MEMBERS_CHANGED')
+	end
+	if not CanLoad('oUF_Adirelle_Boss') and not CanLoad('oUF_Adirelle_Arena') and loaderFrame:IsEventRegistered('PLAYER_ENTERING_WORLD') then
+		Debug('Stop listening to PLAYER_ENTERING_WORLD')
+		loaderFrame:UnregisterEvent('PLAYER_ENTERING_WORLD')
+	end
+end
 
-local function TryToLoadModules()
-	for name, data in pairs(modules) do
-		if data.test() then
-			if LoadAddOn(name) then
-				modules[name] = nil
-			end
+loaderFrame:SetScript('OnEvent', function(self, event, ...)
+	if event == 'ADDON_LOADED' then
+		if ... == loaderName then
+			Debug('Stop listening to ADDON_LOADED')
+			loaderFrame:UnregisterEvent('ADDON_LOADED')
+		else
+			return
 		end
 	end
-end
-
--- Try immediately
-TryToLoadModules()
-
-if not next(modules) then return end
-
--- There are still unloaded modules, test them on PLAYER_LOGIN
-local loaderFrame = CreateFrame("Frame")
-loaderFrame:RegisterEvent('PLAYER_LOGIN')
-loaderFrame:SetScript('OnEvent', function(self, event, name)
-	self:UnregisterAllEvents()
-	TryToLoadModules()
-	for name, data in pairs(modules) do
-		self:RegisterEvent(data.event)
-	end	
+	return LoadModules(event)
 end)
+loaderFrame:RegisterEvent('ADDON_LOADED')
+loaderFrame:RegisterEvent('PLAYER_LOGIN')
+loaderFrame:RegisterEvent('PARTY_MEMBERS_CHANGED')
+loaderFrame:RegisterEvent('PLAYER_ENTERING_WORLD')
 
+LoadModules('initialization')

@@ -3,5 +3,6 @@
 ## Version: 1.0
 ## Title: oUF_Adirelle - loader
 ## Notes: Load other oUF_Adirelle when appropriate.
+## OptionalDeps: AdiDebug
 
 ..\oUF_Adirelle\loader.lua
