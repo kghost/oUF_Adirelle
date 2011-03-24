@@ -23,17 +23,17 @@ end
 
 local function LoadModules(event)
 	Debug('Trying to load modules on', event)
-	if CanLoad('oUF_Adirelle_Raid') and (GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0 )then
+	if CanLoad('oUF_Adirelle_Raid') and (GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0) then
 		Debug('Loading oUF_Adirelle_Raid')
 		LoadAddOn('oUF_Adirelle_Raid')
 	end
 	local _, instanceType = IsInInstance()
 	if CanLoad('oUF_Adirelle_Boss') and (instanceType == "party" or instanceType == "raid") then
 		Debug('Loading oUF_Adirelle_Boss')
-		LoadAddon('oUF_Adirelle_Boss')
+		LoadAddOn('oUF_Adirelle_Boss')
 	elseif CanLoad('oUF_Adirelle_Arena') and instanceType == "arena" then
 		Debug('Loading oUF_Adirelle_Arena')
-		LoadAddon('oUF_Adirelle_Arena')
+		LoadAddOn('oUF_Adirelle_Arena')
 	end
 	if not CanLoad('oUF_Adirelle_Raid') and loaderFrame:IsEventRegistered('PARTY_MEMBERS_CHANGED') then
 		Debug('Stop listening to PARTY_MEMBERS_CHANGED')
